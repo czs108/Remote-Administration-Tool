@@ -1,59 +1,59 @@
 # Goasm-RAT
 
-> This project has two original repositories:
+> 该项目有两个原始仓库：
 >
 > - https://github.com/czs108/Goasm-RAT/
 > - https://github.com/lgw1995/Goasm-RAT/
 
-## Languages
+## 翻译
 
 - [English](https://github.com/czs108/Goasm-RAT/blob/master/README.md)
 - [简体中文](https://github.com/czs108/Goasm-RAT/blob/master/README-CN.md)
 
-## About The Project
+## 简介
 
-***Goasm-RAT*** is a simple **Windows** console remote administration tool, written in *Go* and *Microsoft Assembly*. It supports remote *shell* and *screenshot* now.
+***Goasm-RAT***是一款简单的**Windows**控制台远程控制工具，使用*Go*和*Microsoft Assembly*编写。目前支持远程*Shell*及屏幕截图功能。
 
-## Getting Started
+## 开始
 
-### Prerequisites
+### 前置条件
 
-- Install [*MASM32*](http://www.masm32.com/).
-- Install [*Go*](https://golang.org/).
+- 安装[*MASM32*](http://www.masm32.com/)。
+- 安装[*Go*](https://golang.org/)。
 
-### Building
+### 构建
 
-#### Client
+#### 客户端
 
 ```powershell
 ..\client> .\build.ps1
 ```
 
-#### Server
+#### 服务器
 
 ```powershell
 ..\server\scripts> .\build.ps1
 ```
 
-## Usage
+## 使用
 
-### Client
+### 客户端
 
-Use command line arguments to specify the IP address and *TCP* port of the server when running the client.
+使用命令行参数指定服务器的IP地址及*TCP*端口号。
 
 ```powershell
 client <ipv4-addr> <port>
 ```
 
-### Server
+### 服务器
 
-Use `-p` option to specify the *TCP* listening port, the default port is **10080**.
+使用`-p`选项指定*TCP*监听端口，默认端口为**10080**。
 
 ```powershell
 server -p <port>
 ```
 
-Use `-h` option to print the help.
+使用`-h`选项显示帮助信息。
 
 ```powershell
 -h    This help
@@ -61,21 +61,21 @@ Use `-h` option to print the help.
       Listening port (default 10080)
 ```
 
-#### Commands
+#### 命令
 
-When the server is waiting for user input, the background information or execution results will not be displayed in real-time. You need to press <kbd>Enter</kbd> to flush manually.
+当服务器等待用户输入时，后台信息和命令执行结果并不会实时显示，需要使用<kbd>Enter</kbd>手动刷新。
 
-##### Basic Control
+##### 基础控制
 
 - `sw`
 
-  Switch the client currently being controlled.
+  切换当前控制的客户端。
 
   ```powershell
   sw <client-id>
   ```
 
-  For example:
+  例如：
 
   ```powershell
   > sw 1
@@ -84,7 +84,7 @@ When the server is waiting for user input, the background information or executi
 
 - `exit`
 
-  Exit the server.
+  退出服务器。
 
   ```powershell
   exit
@@ -94,13 +94,13 @@ When the server is waiting for user input, the background information or executi
 
 - `exec`
 
-  Execute a shell command on the client.
+  在客户端执行*Shell*命令。
 
   ```powershell
   exec <command>
   ```
 
-  For example:
+  例如：
 
     ```powershell
   > exec whoami
@@ -114,21 +114,21 @@ When the server is waiting for user input, the background information or executi
   ----------------------------------------------------
     ```
 
-##### Screenshot
+##### 屏幕截图
 
 - `sc`
 
-  Take a screenshot of the client and save it as a `.png` file.
+  截取客户端屏幕，保存为`.png`文件。
 
   ```powershell
   sc
   ```
 
-## License
+## 许可证
 
-Distributed under the *GNU General Public* License. See `LICENSE` for more information.
+使用*GNU General Public*协议，请参考`LICENSE`文件。
 
-## Contact
+## 作者
 
 - ***Chenzs108***
 
@@ -136,7 +136,7 @@ Distributed under the *GNU General Public* License. See `LICENSE` for more infor
   >
   > ***E-Mail***: chenzs108@outlook.com
   >
-  > ***WeChat***: chenzs108
+  > ***微信***: chenzs108
 
 - ***Liugw***
 

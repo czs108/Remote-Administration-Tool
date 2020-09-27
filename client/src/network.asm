@@ -120,7 +120,7 @@ FreeWinSocket       proc
 FreeWinSocket       endp
 
 
-StartupService      proc
+StartupService      proc    ip:ptr BYTE, port:DWORD
     local   @server_addr:sockaddr_in
 
     invoke  socket, AF_INET, SOCK_STREAM, 0
@@ -132,9 +132,9 @@ StartupService      proc
 
     invoke  RtlZeroMemory, addr @server_addr, sizeof @server_addr
     mov     @server_addr.sin_family, AF_INET
-    invoke  htons, SERVER_PORT
+    invoke  htons, port
     mov     @server_addr.sin_port, ax
-    mov     eax, offset SERVER_IP
+    mov     eax, ip
     invoke  inet_addr, eax
     mov     @server_addr.sin_addr.S_un.S_addr, eax
 

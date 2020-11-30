@@ -5,81 +5,83 @@ import (
 	"strings"
 
 	"server/internal/mod"
-	net "server/internal/network"
-	"server/internal/utility"
+	"server/internal/net"
+	"server/internal/utility/asynlog"
+	"server/internal/utility/panic"
 )
 
 const (
 	// Shell means the packet is related to shell commands.
-	Shell net.PacketType = 3
+	Shell net.PktType = 3
 
 	msgBorder string = "----------------------------------------------------"
 )
 
 type shell struct {
 	currClient net.Client
-
-	utility.LogQue
+	asynlog.Logger
 }
 
 // New creates a new shell module.
-func New(logger utility.LogQue) mod.Module {
-	utility.Assert(logger != nil, "Null logger.")
-
+func New(logger asynlog.Logger) mod.Mod {
 	return &shell{
-		LogQue: logger,
+		Logger: logger,
 	}
 }
 
 func (shell *shell) Exec(cmd string, args []string) error {
-	utility.Assert(cmd == "exec", "Invalid command.")
+	panic.Assert(cmd == "exec", "Invalid command.")
 
 	if shell.currClient == nil {
 		return fmt.Errorf("The current client is null")
 	}
 
-	shellCmd := fmt.Sprintf("%s%s", strings.Join(args, " "), "\r\n")
+	entireCmd := fmt.Sprintf("%shell%shell", strings.Join(args, " "), "\r\n")
 
-	packet := net.Packet{}
-	packet.Type = Shell
-	packet.Write([]byte(shellCmd))
-	return shell.currClient.SendPacket(&packet)
+	pkg := net.NewPacket()
+	pkg.Type = Shell
+	pkg.Write([]byte(entireCmd))
+	return shell.currClient.SendPacket(pkg)
 }
 
-func (shell *shell) Cmds() []string {
+func (*shell) Cmds() []string {
 	return []string{
 		"exec",
 	}
 }
 
-func (shell *shell) Respond(client net.Client, packet *net.Packet) error {
-	utility.Assert(packet.Type == Shell, "Invalid packet type.")
+func (shell *shell) Respond(client net.Client, pkg *net.Packet) error {
+	panic.Assert(pkg.Type == Shell, "Invalid packet type.")
 
-	msg := fmt.Sprintf("Shell messages from the client [%v]:\n%s\n%s\n%s\n",
-		client.ID(), msgBorder, string(packet.Data), msgBorder)
+	msg := fmt.Sprintf("Shell messages from the client [%v]:\n%shell\n%shell\n%shell\n",
+		client.ID(), msgBorder, string(pkg.Data), msgBorder)
 
 	shell.Store(msg)
 	return nil
 }
 
-func (shell *shell) Packets() []net.PacketType {
-	return []net.PacketType{
+func (*shell) Packets() []net.PktType {
+	return []net.PktType{
 		Shell,
 	}
 }
 
-func (shell *shell) ID() mod.ModuleID {
+func (*shell) ID() mod.ID {
 	return 1
 }
 
-func (shell *shell) Name() string {
+func (*shell) Name() string {
 	return "SHELL"
+}
+
+func (shell *shell) String() string {
+	return fmt.Sprintf("%d-%s", shell.ID(), shell.Name())
 }
 
 func (shell *shell) SetClient(client net.Client) {
 	shell.currClient = client
 }
 
-func (shell *shell) Close() error {
+func (*shell) Close() error {
 	return nil
 }

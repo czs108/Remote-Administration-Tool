@@ -3,63 +3,63 @@ package mod
 import (
 	"fmt"
 
-	net "server/internal/network"
-	"server/internal/utility"
+	"server/internal/net"
+	"server/internal/utility/panic"
 )
 
 // Dispatcher provides module management.
 type Dispatcher interface {
 
 	// Register registers a module.
-	Register(mod Module) error
+	Register(Mod) error
 
-	// ByID finds the module by the ID.
-	ByID(id ModuleID) Module
+	// ByID finds a module by its ID.
+	ByID(ID) Mod
 
-	// ByCmd finds the module by the command.
-	ByCmd(cmd string) Module
+	// ByCmd finds a module by a supported command.
+	ByCmd(string) Mod
 
-	// ByPacket finds the module by the packet type.
-	ByPacket(packet net.PacketType) Module
+	// ByPacket finds a module by a packet type.
+	ByPacket(net.PktType) Mod
 
-	// All gets all modules.
-	All() []Module
+	// All gets all registered modules.
+	All() []Mod
 }
 
-type modList map[ModuleID]Module
+type modList map[ID]Mod
 
-type cmdList map[string]Module
+type cmdList map[string]Mod
 
-type packetList map[net.PacketType]Module
+type pkgList map[net.PktType]Mod
 
 type dispatcher struct {
-	mods    modList
-	cmds    cmdList
-	packets packetList
+	mods modList
+	cmds cmdList
+	pkgs pkgList
 }
 
 // NewDispatcher creates a new dispatcher.
 func NewDispatcher() Dispatcher {
 	return &dispatcher{
-		mods:    make(modList),
-		cmds:    make(cmdList),
-		packets: make(packetList),
+		mods: make(modList),
+		cmds: make(cmdList),
+		pkgs: make(pkgList),
 	}
 }
 
-func (dp *dispatcher) Register(mod Module) error {
-	utility.Assert(mod != nil, "Null module.")
+func (dp *dispatcher) Register(mod Mod) error {
+	panic.Assert(mod != nil, "Null module.")
 
 	id := mod.ID()
 	if dp.ByID(id) != nil {
-		return fmt.Errorf("Conflicting ID: %v", id)
+		return fmt.Errorf("Conflicting ID: %d", id)
 	}
 
 	dp.mods[id] = mod
 
 	for _, s := range mod.Cmds() {
 		if dp.ByCmd(s) != nil {
-			return fmt.Errorf("Conflicting command: %v", s)
+			return fmt.Errorf("Conflicting command: %s", s)
 		}
 
 		dp.cmds[s] = mod
@@ -70,13 +70,13 @@ func (dp *dispatcher) Register(mod Module) error {
 			return fmt.Errorf("Conflicting packet type: %v", t)
 		}
 
-		dp.packets[t] = mod
+		dp.pkgs[t] = mod
 	}
 
 	return nil
 }
 
-func (dp *dispatcher) ByID(id ModuleID) Module {
+func (dp *dispatcher) ByID(id ID) Mod {
 	if mod, ok := dp.mods[id]; ok {
 		return mod
 	}
@@ -84,7 +84,7 @@ func (dp *dispatcher) ByID(id ModuleID) Module {
 	return nil
 }
 
-func (dp *dispatcher) ByCmd(cmd string) Module {
+func (dp *dispatcher) ByCmd(cmd string) Mod {
 	if mod, ok := dp.cmds[cmd]; ok {
 		return mod
 	}
@@ -92,16 +92,16 @@ func (dp *dispatcher) ByCmd(cmd string) Module {
 	return nil
 }
 
-func (dp *dispatcher) ByPacket(packet net.PacketType) Module {
-	if mod, ok := dp.packets[packet]; ok {
+func (dp *dispatcher) ByPacket(pkg net.PktType) Mod {
+	if mod, ok := dp.pkgs[pkg]; ok {
 		return mod
 	}
 
 	return nil
 }
 
-func (dp *dispatcher) All() []Module {
-	mods := make([]Module, 0, len(dp.mods))
+func (dp *dispatcher) All() []Mod {
+	mods := make([]Mod, 0, len(dp.mods))
 	for _, mod := range dp.mods {
 		mods = append(mods, mod)
 	}

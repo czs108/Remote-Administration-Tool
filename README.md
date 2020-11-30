@@ -25,13 +25,13 @@
 
 #### Client
 
-```powershell
+```console
 ..\client> .\build.ps1
 ```
 
 #### Server
 
-```powershell
+```console
 ..\server\scripts> .\build.ps1
 ```
 
@@ -41,7 +41,7 @@
 
 Use command line arguments to specify the IP address and *TCP* port of the server when running the client.
 
-```powershell
+```bash
 client <ipv4-addr> <port>
 ```
 
@@ -49,13 +49,13 @@ client <ipv4-addr> <port>
 
 Use `-p` option to specify the *TCP* listening port, the default port is **10080**.
 
-```powershell
+```bash
 server -p <port>
 ```
 
 Use `-h` option to print the help.
 
-```powershell
+```console
 -h    This help
 -p int
       Listening port (default 10080)
@@ -71,13 +71,13 @@ When the server is waiting for user input, the background information or executi
 
   Switch the client currently being controlled.
 
-  ```powershell
+  ```bash
   sw <client-id>
   ```
 
   For example:
 
-  ```powershell
+  ```console
   > sw 1
   Sep 24 23:03:27: The current client has changed to [1].
   ```
@@ -86,7 +86,7 @@ When the server is waiting for user input, the background information or executi
 
   Exit the server.
 
-  ```powershell
+  ```bash
   exit
   ```
 
@@ -96,13 +96,13 @@ When the server is waiting for user input, the background information or executi
 
   Execute a shell command on the client.
 
-  ```powershell
+  ```bash
   exec <command>
   ```
 
   For example:
 
-    ```powershell
+    ```console
   > exec whoami
   >
   Sep 25 00:21:38: Shell messages from the client [1]:
@@ -120,9 +120,13 @@ When the server is waiting for user input, the background information or executi
 
   Take a screenshot of the client and save it as a `.png` file.
 
-  ```powershell
+  ```bash
   sc
   ```
+
+## Bugs
+
+The known bugs are marked by `BUG` in the comments.
 
 ## License
 

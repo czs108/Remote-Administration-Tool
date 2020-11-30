@@ -25,13 +25,13 @@
 
 #### 客户端
 
-```powershell
+```console
 ..\client> .\build.ps1
 ```
 
 #### 服务器
 
-```powershell
+```console
 ..\server\scripts> .\build.ps1
 ```
 
@@ -41,7 +41,7 @@
 
 使用命令行参数指定服务器的IP地址及*TCP*端口号。
 
-```powershell
+```bash
 client <ipv4-addr> <port>
 ```
 
@@ -49,13 +49,13 @@ client <ipv4-addr> <port>
 
 使用`-p`选项指定*TCP*监听端口，默认端口为**10080**。
 
-```powershell
+```bash
 server -p <port>
 ```
 
 使用`-h`选项显示帮助信息。
 
-```powershell
+```console
 -h    This help
 -p int
       Listening port (default 10080)
@@ -71,13 +71,13 @@ server -p <port>
 
   切换当前控制的客户端。
 
-  ```powershell
+  ```bash
   sw <client-id>
   ```
 
   例如：
 
-  ```powershell
+  ```console
   > sw 1
   Sep 24 23:03:27: The current client has changed to [1].
   ```
@@ -86,7 +86,7 @@ server -p <port>
 
   退出服务器。
 
-  ```powershell
+  ```bash
   exit
   ```
 
@@ -96,13 +96,13 @@ server -p <port>
 
   在客户端执行*Shell*命令。
 
-  ```powershell
+  ```bash
   exec <command>
   ```
 
   例如：
 
-    ```powershell
+    ```console
   > exec whoami
   >
   Sep 25 00:21:38: Shell messages from the client [1]:
@@ -120,9 +120,13 @@ server -p <port>
 
   截取客户端屏幕，保存为`.png`文件。
 
-  ```powershell
+  ```bash
   sc
   ```
+
+## Bugs
+
+已知的Bug在代码注释中使用`BUG`标记.
 
 ## 许可证
 

@@ -3,7 +3,7 @@ package rat
 import (
 	"sync"
 
-	net "server/internal/network"
+	"server/internal/net"
 )
 
 type socket struct {
@@ -25,13 +25,13 @@ func (socket *socket) Close() error {
 }
 
 type socketList struct {
-	sockets map[net.ClientID]*socket
+	sockets map[net.ID]*socket
 	sync.Mutex
 }
 
 func newSocketList() *socketList {
 	return &socketList{
-		sockets: make(map[net.ClientID]*socket),
+		sockets: make(map[net.ID]*socket),
 	}
 }
 
@@ -48,7 +48,7 @@ func (list *socketList) Add(client net.Client) *socket {
 	return socket
 }
 
-func (list *socketList) Del(id net.ClientID) bool {
+func (list *socketList) Del(id net.ID) bool {
 	list.Lock()
 	defer list.Unlock()
 
@@ -62,7 +62,7 @@ func (list *socketList) Del(id net.ClientID) bool {
 	return true
 }
 
-func (list *socketList) Get(id net.ClientID) *socket {
+func (list *socketList) Get(id net.ID) *socket {
 	list.Lock()
 	defer list.Unlock()
 

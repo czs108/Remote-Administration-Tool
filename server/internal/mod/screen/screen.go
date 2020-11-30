@@ -12,59 +12,57 @@ import (
 	"unsafe"
 
 	"server/internal/mod"
-	net "server/internal/network"
-	"server/internal/utility"
+	"server/internal/net"
+	"server/internal/utility/asynlog"
+	"server/internal/utility/panic"
 )
 
 const (
 	// Screen means the packet is related to screen capture.
-	Screen net.PacketType = 4
+	Screen net.PktType = 4
 )
 
 type screen struct {
 	currClient net.Client
-
-	utility.LogQue
+	asynlog.Logger
 }
 
 // New creates a new screen capture module.
-func New(logger utility.LogQue) mod.Module {
-	utility.Assert(logger != nil, "Null logger.")
-
+func New(logger asynlog.Logger) mod.Mod {
 	return &screen{
-		LogQue: logger,
+		Logger: logger,
 	}
 }
 
-func (screen *screen) Exec(cmd string, args []string) error {
-	utility.Assert(cmd == "sc", "Invalid command.")
+func (sc *screen) Exec(cmd string, args []string) error {
+	panic.Assert(cmd == "sc", "Invalid command.")
 
-	if screen.currClient == nil {
+	if sc.currClient == nil {
 		return fmt.Errorf("The current client is null")
 	}
 
-	packet := net.Packet{}
-	packet.Type = Screen
-	return screen.currClient.SendPacket(&packet)
+	pkg := net.NewPacket()
+	pkg.Type = Screen
+	return sc.currClient.SendPacket(pkg)
 }
 
-func (screen *screen) Cmds() []string {
+func (*screen) Cmds() []string {
 	return []string{
 		"sc",
 	}
 }
 
 // BUG: The color of the pixels in the .png file does not mismatch the original screen.
-func (screen *screen) Respond(client net.Client, packet *net.Packet) error {
-	utility.Assert(packet.Type == Screen, "Invalid packet type.")
+func (sc *screen) Respond(client net.Client, pkg *net.Packet) error {
+	panic.Assert(pkg.Type == Screen, "Invalid packet type.")
 
-	dirName, err := screen.makeDir()
+	dirName, err := sc.makeDir()
 	if err != nil {
 		return err
 	}
 
 	var buffer [unsafe.Sizeof(int32(0)) * 2]byte
-	if _, err := packet.Read(buffer[:]); err != nil {
+	if _, err := pkg.Read(buffer[:]); err != nil {
 		return err
 	}
 
@@ -77,7 +75,7 @@ func (screen *screen) Respond(client net.Client, packet *net.Packet) error {
 		image.Rectangle{image.Point{0, 0},
 			image.Point{int(width), int(height)}})
 
-	reader = bytes.NewReader(packet.Data)
+	reader = bytes.NewReader(pkg.Data)
 	for y := 0; y < int(height); y++ {
 		for x := 0; x < int(width); x++ {
 
@@ -106,33 +104,37 @@ func (screen *screen) Respond(client net.Client, packet *net.Packet) error {
 	msg := fmt.Sprintf(
 		"A screenshot from the client [%v] has been saved as %v.png.",
 		client.ID(), fileName)
-	screen.Store(msg)
+	sc.Store(msg)
 	return nil
 }
 
-func (screen *screen) Packets() []net.PacketType {
-	return []net.PacketType{
+func (*screen) Packets() []net.PktType {
+	return []net.PktType{
 		Screen,
 	}
 }
 
-func (screen *screen) ID() mod.ModuleID {
+func (*screen) ID() mod.ID {
 	return 2
 }
 
-func (screen *screen) Name() string {
+func (*screen) Name() string {
 	return "SCREEN"
 }
 
-func (screen *screen) SetClient(client net.Client) {
-	screen.currClient = client
+func (sc *screen) String() string {
+	return fmt.Sprintf("%d-%s", sc.ID(), sc.Name())
 }
 
-func (screen *screen) Close() error {
+func (sc *screen) SetClient(client net.Client) {
+	sc.currClient = client
+}
+
+func (*screen) Close() error {
 	return nil
 }
 
-func (screen *screen) makeDir() (string, error) {
+func (*screen) makeDir() (string, error) {
 	dirName := time.Now().Format("2006-01")
 	_, err := os.Stat(dirName)
 	if err != nil && os.IsNotExist(err) {

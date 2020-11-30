@@ -9,23 +9,24 @@ import (
 	"sync"
 
 	"server/internal/mod"
-	"server/internal/network"
-	"server/internal/utility"
+	ratnet "server/internal/net"
+	"server/internal/utility/asynlog"
+	"server/internal/utility/panic"
 )
 
 const (
 	// Connect means the packet is related to network connections.
-	Connect network.PacketType = 1
+	Connect ratnet.PktType = 1
 	// Disconnect means the packet is related to network disconnections.
-	Disconnect network.PacketType = 2
+	Disconnect ratnet.PktType = 2
 )
 
-// RAT is the interface definition of the remote administration tool.
+// RAT is the interface of the remote administration tool.
 type RAT interface {
 	io.Closer
 
 	// Register registers a module.
-	Register(mod mod.Module) error
+	Register(mod mod.Mod) error
 
 	// Startup starts the remote administration tool.
 	Startup(port int) error
@@ -38,24 +39,22 @@ type rat struct {
 	listener net.Listener
 
 	sockets    *socketList
-	currClient network.Client
+	currClient ratnet.Client
 
-	abort chan bool
-	wg    sync.WaitGroup
+	abort     chan bool
+	waitGroup sync.WaitGroup
 
 	mod.Dispatcher
 	cmdHandlers mod.CmdHandlerMap
 	netHandlers mod.NetHandlerMap
 
-	utility.LogQue
+	asynlog.Logger
 }
 
-// NewRAT creates a new remote administration tool.
-func NewRAT(logger utility.LogQue) RAT {
-	utility.Assert(logger != nil, "Null logger.")
-
+// New creates a new remote administration tool.
+func New(logger asynlog.Logger) RAT {
 	rat := &rat{
-		LogQue:      logger,
+		Logger:      logger,
 		Dispatcher:  mod.NewDispatcher(),
 		cmdHandlers: make(mod.CmdHandlerMap),
 		netHandlers: make(mod.NetHandlerMap),
@@ -67,14 +66,12 @@ func NewRAT(logger utility.LogQue) RAT {
 	}
 
 	rat.cmdHandlers["sw"] = rat.switchClient
-
 	rat.cmdHandlers["off"] = rat.terminateClient
 
-	rat.netHandlers[Connect] = func(network.Client, *network.Packet) error {
+	rat.netHandlers[Disconnect] = rat.onDisconnect
+	rat.netHandlers[Connect] = func(ratnet.Client, *ratnet.Packet) error {
 		return nil
 	}
-
-	rat.netHandlers[Disconnect] = rat.onDisconnect
 
 	if err := rat.Register(rat); err != nil {
 		logger.Panic(err)
@@ -93,7 +90,7 @@ func (rat *rat) Startup(port int) error {
 	rat.sockets = newSocketList()
 	rat.abort = make(chan bool)
 
-	rat.wg.Add(1)
+	rat.waitGroup.Add(1)
 	go rat.listen()
 	return nil
 }
@@ -123,7 +120,7 @@ func (rat *rat) Exec(cmd string, args []string) error {
 
 	// Handle commands supported by RAT itself.
 	handler, ok := rat.cmdHandlers[cmd]
-	utility.Assert(ok, "The module has registered an invalid command.")
+	panic.Assert(ok, "The module has registered an invalid command.")
 
 	return handler(args)
 }
@@ -138,15 +135,15 @@ func (rat *rat) Cmds() []string {
 }
 
 // Respond only handles packets supported by RAT itself.
-func (rat *rat) Respond(client network.Client, packet *network.Packet) error {
-	handler, ok := rat.netHandlers[packet.Type]
-	utility.Assert(ok, "The module has registered an invalid packet type.")
+func (rat *rat) Respond(client ratnet.Client, pkg *ratnet.Packet) error {
+	handler, ok := rat.netHandlers[pkg.Type]
+	panic.Assert(ok, "The module has registered an invalid packet type.")
 
-	return handler(client, packet)
+	return handler(client, pkg)
 }
 
-func (rat *rat) Packets() []network.PacketType {
-	types := make([]network.PacketType, 0, len(rat.netHandlers))
+func (rat *rat) Packets() []ratnet.PktType {
+	types := make([]ratnet.PktType, 0, len(rat.netHandlers))
 	for t := range rat.netHandlers {
 		types = append(types, t)
 	}
@@ -154,15 +151,19 @@ func (rat *rat) Packets() []network.PacketType {
 	return types
 }
 
-func (rat *rat) ID() mod.ModuleID {
+func (*rat) ID() mod.ID {
 	return 0
 }
 
-func (rat *rat) Name() string {
+func (*rat) Name() string {
 	return "RAT"
 }
 
-func (rat *rat) SetClient(client network.Client) {
+func (rat *rat) String() string {
+	return fmt.Sprintf("%d-%s", rat.ID(), rat.Name())
+}
+
+func (rat *rat) SetClient(client ratnet.Client) {
 	rat.currClient = client
 
 	for _, mod := range rat.All() {
@@ -185,14 +186,14 @@ func (rat *rat) Close() error {
 
 	rat.sockets.Close()
 
-	rat.wg.Wait()
+	rat.waitGroup.Wait()
 	rat.LogStorage()
 	rat.Log("The server has exited.")
 	return nil
 }
 
 func (rat *rat) listen() {
-	defer rat.wg.Done()
+	defer rat.waitGroup.Done()
 	defer rat.Store("The listen routine has exited.")
 
 	for {
@@ -207,23 +208,24 @@ func (rat *rat) listen() {
 			return
 		}
 
-		client := network.NewClient(conn)
+		// A new client has connected to the server.
+		client := ratnet.NewClient(conn)
 		rat.Store(fmt.Sprintf("A new client [%v] has connected.", client.ID()))
 		socket := rat.sockets.Add(client)
 
-		rat.wg.Add(1)
+		rat.waitGroup.Add(1)
 		go rat.transfer(socket)
 	}
 }
 
 func (rat *rat) transfer(socket *socket) {
-	defer rat.wg.Done()
+	defer rat.waitGroup.Done()
 	defer rat.Store(
 		fmt.Sprintf("The transfer routine of client [%v] has exited.", socket.client.ID()))
 
 	client := socket.client
 	for {
-		packet, err := client.RecvPacket()
+		pkg, err := client.RecvPacket()
 		if err != nil {
 			select {
 			case <-socket.abort:
@@ -235,15 +237,15 @@ func (rat *rat) transfer(socket *socket) {
 			return
 		}
 
-		mod := rat.ByPacket(packet.Type)
+		mod := rat.ByPacket(pkg.Type)
 		if mod == nil {
 			rat.Store(
 				fmt.Errorf("The client [%v] has received a packet with invalid type: %v",
-					client.ID(), packet.Type))
+					client.ID(), pkg.Type))
 			continue
 		}
 
-		err = mod.Respond(client, packet)
+		err = mod.Respond(client, pkg)
 		if err != nil {
 			if errors.Is(err, io.EOF) {
 				rat.sockets.Del(client.ID())
@@ -256,7 +258,7 @@ func (rat *rat) transfer(socket *socket) {
 }
 
 func (rat *rat) getSocket(id interface{}) (*socket, error) {
-	cid, err := network.ToClientID(id)
+	cid, err := ratnet.ToID(id)
 	if err != nil {
 		return nil, err
 	}
@@ -301,8 +303,8 @@ func (rat *rat) terminateClient(args []string) error {
 
 // ------ Packet Handlers ------
 
-func (rat *rat) onDisconnect(client network.Client, packet *network.Packet) error {
-	utility.Assert(client != nil, "Null argument.")
+func (rat *rat) onDisconnect(client ratnet.Client, pkg *ratnet.Packet) error {
+	panic.Assert(client != nil, "Null argument.")
 
 	id := client.ID()
 	if rat.sockets.Del(id) {

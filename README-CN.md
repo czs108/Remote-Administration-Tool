@@ -126,7 +126,7 @@ server -p <port>
 
 ## Bugs
 
-已知的Bug在代码注释中使用`BUG`标记.
+已知的Bug在代码注释中使用`BUG`标记。
 
 ## 许可证
 

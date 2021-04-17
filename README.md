@@ -1,5 +1,9 @@
 # Goasm-RAT
 
+![Go](badges/Go-1.15-brightgreen.svg)
+![ASM](badges/Microsoft-ASM-brightgreen.svg)
+[![License](badges/License-GPL-3.0-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.html)
+
 > This project has two original repositories:
 >
 > - https://github.com/czs108/Goasm-RAT/

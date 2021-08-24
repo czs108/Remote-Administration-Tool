@@ -15,7 +15,7 @@ includelib /masm32/lib/user32.lib
 
 
 .code
-AllocMemory     proc    data_size:DWORD
+AllocMemory     proc    data_size: DWORD
     invoke  VirtualAlloc, NULL, data_size, MEM_COMMIT or MEM_RESERVE, PAGE_READWRITE
     .if     eax == NULL
         print   "Failed to allocate memory.", 0Dh, 0Ah
@@ -29,7 +29,7 @@ AllocMemory     proc    data_size:DWORD
 AllocMemory     endp
 
 
-FreeMemory      proc    data:ptr BYTE
+FreeMemory      proc    data: ptr BYTE
     .if data != NULL
         invoke  VirtualFree, data, 0, MEM_RELEASE
         mov     data, NULL

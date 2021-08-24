@@ -15,8 +15,8 @@ includelib /masm32/lib/wsock32.lib
 
 
 .code
-SendPacket  proc    remote:SOCKET, header:ptr Header, data:ptr BYTE
-    local   @data_size:DWORD
+SendPacket  proc    remote: SOCKET, header: ptr Header, data: ptr BYTE
+    local   @data_size: DWORD
 
     ; Send the header of the packet
     invoke  SendData, remote, header, sizeof Header
@@ -36,9 +36,9 @@ SendPacket  proc    remote:SOCKET, header:ptr Header, data:ptr BYTE
 SendPacket  endp
 
 
-RecvPacket  proc    remote:SOCKET, header:ptr Header, data:ptr DWORD
-    local   @data_size:DWORD
-    local   @buffer:ptr BYTE
+RecvPacket  proc    remote: SOCKET, header: ptr Header, data: ptr DWORD
+    local   @data_size: DWORD
+    local   @buffer: ptr BYTE
 
     ; Receive the header of the packet
     invoke  RecvData, remote, header, sizeof Header

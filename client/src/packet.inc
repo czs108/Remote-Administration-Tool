@@ -13,6 +13,6 @@ Header      struct
 Header      ends
 
 
-SendPacket  proto   remote:SOCKET, header:ptr Header, data:ptr BYTE
+SendPacket  proto   remote: SOCKET, header: ptr Header, data: ptr BYTE
 
-RecvPacket  proto   remote:SOCKET, header:ptr Header, data:ptr DWORD
+RecvPacket  proto   remote: SOCKET, header: ptr Header, data: ptr DWORD

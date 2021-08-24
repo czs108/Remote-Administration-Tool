@@ -24,9 +24,9 @@ SLEEP_INTERVAL  equ     5   ; Seconds
 
 InitPipe        proto
 FreePipe        proto
-PeekLoop        proto   remote:SOCKET
-PeekPipe        proto   times:DWORD, got_size:ptr DWORD
-SendPipeData    proto   remote:SOCKET, data_size:DWORD
+PeekLoop        proto   remote: SOCKET
+PeekPipe        proto   times: DWORD, got_size: ptr DWORD
+SendPipeData    proto   remote: SOCKET, data_size: DWORD
 
 
 .data
@@ -38,9 +38,9 @@ proc_info           PROCESS_INFORMATION     <?>
 
 
 .code
-StartupShell    proc    remote:SOCKET
-    local   @startup_info:STARTUPINFO
-    local   @shell_path[MAX_PATH]:TCHAR
+StartupShell    proc    remote: SOCKET
+    local   @startup_info: STARTUPINFO
+    local   @shell_path[MAX_PATH]: TCHAR
 
     invoke  InitPipe
     .if     eax == FALSE
@@ -100,8 +100,8 @@ StopShell       proc
 StopShell       endp
 
 
-OnShell         proc    remote:SOCKET, header:ptr Header, data:ptr BYTE
-    local   @written:DWORD
+OnShell         proc    remote: SOCKET, header: ptr Header, data: ptr BYTE
+    local   @written: DWORD
 
     print   "The client has received a request to execute a shell command.", 0Dh, 0Ah
 
@@ -132,7 +132,7 @@ OnShell         endp
 
 
 InitPipe        proc
-    local   @security_attr:SECURITY_ATTRIBUTES
+    local   @security_attr: SECURITY_ATTRIBUTES
 
     invoke  RtlZeroMemory, addr @security_attr, sizeof @security_attr
     mov     @security_attr.nLength, sizeof @security_attr
@@ -182,8 +182,8 @@ FreePipe        proc
 FreePipe        endp
 
 
-PeekLoop        proc    remote:SOCKET
-    local   @remain:DWORD
+PeekLoop        proc    remote: SOCKET
+    local   @remain: DWORD
 
     .while  TRUE
         invoke  PeekPipe, TRY_PEEK_TIMES, addr @remain
@@ -206,9 +206,9 @@ PeekLoop        proc    remote:SOCKET
 PeekLoop        endp
 
 
-PeekPipe        proc    times:DWORD, got_size:ptr DWORD
-    local   @remain:DWORD
-    local   @total:DWORD
+PeekPipe        proc    times: DWORD, got_size: ptr DWORD
+    local   @remain: DWORD
+    local   @total: DWORD
 
     mov     @remain, 0
     mov     @total, 0
@@ -240,10 +240,10 @@ _Exit:
 PeekPipe        endp
 
 
-SendPipeData    proc    remote:SOCKET, data_size:DWORD
-    local   @got:DWORD
-    local   @buffer:ptr BYTE
-    local   @header:Header
+SendPipeData    proc    remote: SOCKET, data_size: DWORD
+    local   @got: DWORD
+    local   @buffer: ptr BYTE
+    local   @header: Header
 
     .if     data_size == 0
         ret

@@ -94,10 +94,10 @@ FreeDevice  proc
 FreeDevice  endp
 
 
-OnScreen    proc    remote:SOCKET, header:ptr Header, data:ptr BYTE
-    local   @buffer:ptr BYTE
-    local   @header:Header
-    local   @success:BOOL
+OnScreen    proc    remote: SOCKET, header: ptr Header, data: ptr BYTE
+    local   @buffer: ptr BYTE
+    local   @header: Header
+    local   @success: BOOL
 
     print   "The client has received a request to take a screenshot.", 0Dh, 0Ah
 

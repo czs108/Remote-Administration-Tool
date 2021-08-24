@@ -9,4 +9,4 @@ InitDevice  proto
 
 FreeDevice  proto
 
-OnScreen    proto   remote:SOCKET, header:ptr Header, data:ptr BYTE
+OnScreen    proto   remote: SOCKET, header: ptr Header, data: ptr BYTE

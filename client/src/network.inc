@@ -6,10 +6,10 @@ InitWinSocket   proto
 
 FreeWinSocket   proto
 
-RecvData        proto   remote:SOCKET, data:ptr BYTE, data_size:DWORD
+RecvData        proto   remote: SOCKET, data: ptr BYTE, data_size: DWORD
 
-SendData        proto   remote:SOCKET, data:ptr BYTE, data_size:DWORD
+SendData        proto   remote: SOCKET, data: ptr BYTE, data_size: DWORD
 
-StartupService  proto   ip:ptr BYTE, port:DWORD
+StartupService  proto   ip: ptr BYTE, port: DWORD
 
 StopService     proto

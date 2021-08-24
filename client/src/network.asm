@@ -30,8 +30,8 @@ TRY_CONNECT_TIMES       equ     100
 TRY_CONNECT_INTERVAL    equ     5   ; Seconds
 
 
-Connect         proto   server_addr:ptr sockaddr_in
-PacketDispatch  proto   header:ptr Header, data:ptr BYTE
+Connect         proto   server_addr: ptr sockaddr_in
+PacketDispatch  proto   header: ptr Header, data: ptr BYTE
 NetworkLoop     proto
 LoginNotify     proto
 LoadModules     proto
@@ -48,8 +48,8 @@ server      SOCKET      INVALID_SOCKET
 
 
 .code
-RecvData    proc    remote:SOCKET, data:ptr BYTE, data_size:DWORD
-    local   @received:DWORD
+RecvData    proc    remote: SOCKET, data: ptr BYTE, data_size: DWORD
+    local   @received: DWORD
 
     xor     ecx, ecx
     mov     @received, 0
@@ -74,8 +74,8 @@ RecvData    proc    remote:SOCKET, data:ptr BYTE, data_size:DWORD
 RecvData    endp
 
 
-SendData    proc    remote:SOCKET, data:ptr BYTE, data_size:DWORD
-    local   @sent:DWORD
+SendData    proc    remote: SOCKET, data: ptr BYTE, data_size: DWORD
+    local   @sent: DWORD
 
     xor     ecx, ecx
     mov     @sent, 0
@@ -101,7 +101,7 @@ SendData    endp
 
 
 InitWinSocket       proc
-    local   @wsa:WSADATA
+    local   @wsa: WSADATA
 
     invoke  WSAStartup, SOCKET_VERSION, addr @wsa
     .if     eax != 0
@@ -120,8 +120,8 @@ FreeWinSocket       proc
 FreeWinSocket       endp
 
 
-StartupService      proc    ip:ptr BYTE, port:DWORD
-    local   @server_addr:sockaddr_in
+StartupService      proc    ip: ptr BYTE, port: DWORD
+    local   @server_addr: sockaddr_in
 
     invoke  socket, AF_INET, SOCK_STREAM, 0
     .if     eax == INVALID_SOCKET
@@ -177,7 +177,7 @@ StopService         endp
 
 
 LoginNotify         proc
-    local   @header:Header
+    local   @header: Header
 
     mov     @header.packet_type, CONNECT
     invoke  lstrlen, addr LOGIN_TAG
@@ -191,8 +191,8 @@ LoginNotify         endp
 
 
 NetworkLoop         proc
-    local   @header:Header
-    local   @buffer:ptr BYTE
+    local   @header: Header
+    local   @buffer: ptr BYTE
 
     mov     @buffer, NULL
     .while  TRUE
@@ -213,7 +213,7 @@ NetworkLoop         proc
 NetworkLoop         endp
 
 
-PacketDispatch      proc    header:ptr Header, data:ptr BYTE
+PacketDispatch      proc    header: ptr Header, data: ptr BYTE
     mov     esi, header
     mov     eax, dword ptr [esi + Header.packet_type]
     switch  eax
@@ -230,8 +230,8 @@ PacketDispatch      proc    header:ptr Header, data:ptr BYTE
 PacketDispatch      endp
 
 
-Connect             proc    server_addr:ptr sockaddr_in
-    local   @i:DWORD
+Connect             proc    server_addr: ptr sockaddr_in
+    local   @i: DWORD
 
     mov     @i, 0
     .while  @i < TRY_CONNECT_TIMES
